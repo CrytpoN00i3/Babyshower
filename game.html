@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Mi Baby Shower - Juego</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Dancing Script', cursive;
+      text-align: center;
+      background: linear-gradient(to bottom, pink, white);
+      background-image: url(hearts.png);
+      color: #333; /* dark text color */
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+    #container {
+      width: 100%;
+      max-width: 400px;
+      padding: 20px;
+    }
+    #gameCanvas {
+      background-color: #000; /* black background for game canvas */
+      border: 2px solid white;
+      width: 100%;
+      max-width: 100%;
+    }
+    #buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 10px;
+    }
+    .game-button {
+      background-color: #f06292; /* pink button */
+      color: white;
+      padding: 12px 20px;
+      border: none;
+      cursor: pointer;
+      flex: 1;
+      margin: 0 5px;
+    }
+    #gameOverMsg {
+      display: none;
+      font-size: 24px;
+      color: red;
+      margin-top: 20px;
+    }
+    #leaderboard {
+      display: none;
+      font-size: 24px;
+      color: red;
+      margin-top: 20px;
+    }
+    #leaderboard ul {
+      list-style-type: none;
+      padding: 0;
+    }
+    #leaderboard li {
+      font-size: 20px;
+      color: black;
+    }
+    /* Modal styles */
+    .modal {
+      display: none; /* Hidden by default */
+      position: fixed; /* Stay in place */
+      z-index: 1; /* Sit on top */
+      padding-top: 100px; /* Location of the box */
+      left: 0;
+      top: 0;
+      width: 100%; /* Full width */
+      height: 100%; /* Full height */
+      overflow: auto; /* Enable scroll if needed */
+      background-color: rgb(0,0,0); /* Fallback color */
+      background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+    }
+    .modal-content {
+      font-family: 'Arial Narrow', sans-serif; /* Change to your desired font family */
+    font-size: 25px; /* Change to your desired font size */
+    color: #333; /* Optional: change to your desired text color */
+      background-color: #fefefe;
+      margin: auto;
+      padding: 20px;
+      border: 1px solid #888;
+      width: 80%;
+      max-width: 400px; /* Maximum width */
+      text-align: center; /* Center the text */
+    }
+    .close {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+    }
+    .close:hover,
+    .close:focus {
+      color: black;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    #siguienteBtn {
+      background-color: #f06292; /* Pink button */
+      color: white;
+      padding: 12px 20px;
+      border: none;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<audio id="backgroundMusic" loop>
+  <source src="gameaudio.mp3" type="audio/mpeg">
+  Your browser does not support the audio element.
+</audio>
+<body>
+  <div id="container">
+    <h1>Mi Baby Shower</h1>
+    <canvas id="gameCanvas" width="400" height="600"></canvas>
+    <div id="buttons">
+      <button class="game-button" id="startGameBtn">Empezar</button>
+      <button class="game-button" id="continueBtn">Continuar</button>
+    </div>
+    <div id="gameOverMsg">Game Over</div>
+    <div id="leaderboard">
+      <h2>Leaderboard</h2>
+      <ul id="leaderboardList"></ul>
+    </div>
+  </div>
+  <!-- Modal Structure -->
+  <div id="customModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <p id="modalMessage"></p>
+      <button id="siguienteBtn">Siguiente</button>
+    </div>
+  </div>
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+    const spermImg = new Image();
+    spermImg.src = 'spermheadnobg.png'; // Replace with your image path
+
+    const spermTailImg = new Image();
+    spermTailImg.src = 'spermtailnobg.png'; // Replace with your image path
+
+    const whiteCellImg = new Image();
+    whiteCellImg.src = 'whitecellbestnobg.png'; // Replace with your image path
+
+    const wallImg = new Image();
+    wallImg.src = 'wall.png'; // Replace with your image path
+
+    const flippedWallImg = new Image();
+    flippedWallImg.src = 'flippedwall.png';
+
+    const backgroundImage = new Image();
+    backgroundImage.src = 'gamebg5.png'; // Replace with your image path
+
+    const backgroundMusic = document.getElementById("backgroundMusic");
+
+    let sperm, whiteCells, score, gameState, gameSpeed, distanceTraveled;
+    let wallPositions, wallGap, startTime;
+    let spawnRate, spawnTimer, baseSpeed, speedIncrement;
+    const userName = localStorage.getItem("username") || 'Player';
+    let leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
+    let backgroundX = 0;
+    let backgroundSpeed = 1; // Adjust this speed as needed
+
+
+    class Sperm {
+      constructor() {
+        this.x = 100;
+        this.y = canvas.height / 2;
+        this.radius = 12;
+        this.velocity = 0;
+        this.gravity = 0.25;
+        this.lift = -6;
+        this.tailAngle = 0;
+      }
+
+      draw() {
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.rotate(this.tailAngle);
+
+        // Draw the tail
+        ctx.drawImage(spermTailImg, -this.radius * 3.5, -this.radius * 0.5, this.radius * 3, this.radius);
+
+        // Draw the head
+        ctx.drawImage(spermImg, -this.radius, -this.radius, this.radius * 2, this.radius * 2);
+
+        ctx.restore();
+      }
+
+      update() {
+        this.velocity += this.gravity;
+        this.y += this.velocity;
+
+        if (this.y + this.radius > canvas.height) {
+          this.y = canvas.height - this.radius;
+          this.velocity = 0;
+        } else if (this.y - this.radius < 0) {
+          this.y = this.radius;
+          this.velocity = 0;
+        }
+
+        this.tailAngle = Math.sin(Date.now() * 0.01) * 0.2;
+      }
+
+      flap() {
+        this.velocity = this.lift;
+      }
+    }
+
+    class WhiteCell {
+      constructor(x, y, speed) {
+        this.x = x;
+        this.y = y;
+        this.radius = 12; // Smaller radius for white cells
+        this.speed = speed;
+      }
+
+      draw() {
+        ctx.drawImage(whiteCellImg, this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2);
+      }
+
+      update() {
+        this.x -= this.speed;
+      }
+    }
+
+    // Initialize game variables
+    function initGame() {
+      sperm = new Sperm();
+      whiteCells = [];
+      score = 0;
+      gameState = "menu";
+      gameSpeed = 2;
+      distanceTraveled = 0;
+      wallPositions = [];
+      wallGap = 400; // Wider gap
+      baseSpeed = 2;
+      speedIncrement = 0.03;
+
+      startTime = null; // Reset start time
+      spawnRate = 75; // Initial spawn rate for white cells
+      spawnTimer = 0;
+
+      // Initialize walls with a smooth wave-like motion
+      for (let i = 0; i < canvas.width; i++) {
+        let angle = (i / canvas.width) * Math.PI * 2;
+        wallPositions[i] = {
+          top: canvas.height / 6 + Math.sin(angle) * 20, // Reduced height
+          bottom: (canvas.height / 6) * 5 + Math.sin(angle + Math.PI) * 20 // Reduced height
+        };
+      }
+
+      // Initial sperm position
+      sperm.x = 50;
+      sperm.y = canvas.height / 2;
+      while (sperm.y - sperm.radius < wallPositions[sperm.x].top || sperm.y + sperm.radius > wallPositions[sperm.x].bottom) {
+        sperm.y = Math.random() * (canvas.height - sperm.radius * 2) + sperm.radius;
+      }
+    }
+
+    // Start game
+    function startGame() {
+      localStorage.setItem("username", userName);
+      initGame();
+      gameState = "playing";
+      startTime = Date.now(); // Record the start time
+      document.getElementById("startGameBtn").style.display = "none";
+      document.getElementById("continueBtn").style.display = "none";
+      document.getElementById("gameOverMsg").style.display = "none";
+      backgroundMusic.play(); // Start playing background music
+      loop();
+    }
+
+    // Main game loop
+    function loop() {
+      updateGame();
+      drawGame();
+
+      if (gameState === "playing") {
+        requestAnimationFrame(loop);
+      }
+    }
+
+    // Update game logic
+    function updateGame() {
+      sperm.update();
+
+      // Update background position
+      backgroundX -= backgroundSpeed;
+      if (backgroundX <= -canvas.width) {
+          backgroundX = 0;
+      }
+
+      // Update wall positions
+      for (let i = 0; i < canvas.width; i++) {
+        let angle = ((Date.now() - startTime) * 0.002 + (i / canvas.width) * Math.PI * 2) % (Math.PI * 2);
+        wallPositions[i].top = canvas.height / 6 + Math.sin(angle) * 20 + Math.sin(Date.now() * 0.003) * 20; // Smooth motion
+        wallPositions[i].bottom = (canvas.height / 6) * 5 + Math.sin(angle + Math.PI) * 20 + Math.cos(Date.now() * 0.003) * 20; // Smooth motion
+      }
+
+      // Check for collisions with walls
+      for (let i = 0; i < canvas.width; i++) {
+        if (sperm.x + sperm.radius > i && sperm.x - sperm.radius < i + 1 &&
+          (sperm.y - sperm.radius < wallPositions[i].top || sperm.y + sperm.radius > wallPositions[i].bottom)) {
+          gameOver();
+        }
+      }
+
+      // Spawn white cells sporadically and then more frequently
+      spawnTimer += gameSpeed;
+      if (spawnTimer >= spawnRate) {
+        whiteCells.push(new WhiteCell(canvas.width + 100, Math.random() * canvas.height, baseSpeed + Math.random()));
+        spawnTimer = 0;
+        if (spawnRate > 500) {
+          spawnRate -= 50; // Decrease spawn rate gradually
+        }
+      }
+
+      // Update white cells
+      for (let i = 0; i < whiteCells.length; i++) {
+        whiteCells[i].update();
+
+        // Check for collisions with sperm
+        let dx = sperm.x - whiteCells[i].x;
+        let dy = sperm.y - whiteCells[i].y;
+        let distance = Math.sqrt(dx * dx + dy * dy);
+
+        if (distance < sperm.radius + whiteCells[i].radius) {
+          gameOver();
+        }
+
+        // Remove off-screen white cells
+        if (whiteCells[i].x + whiteCells[i].radius < 0) {
+          whiteCells.splice(i, 1);
+          i--;
+        }
+      }
+
+      // Calculate score based on distance traveled
+      distanceTraveled += gameSpeed;
+      score = Math.floor(distanceTraveled / 10); // Adjust score calculation as needed
+    }
+
+    // Game Over
+    function gameOver() {
+      gameState = "gameover";
+      document.getElementById("gameOverMsg").style.display = "block";
+      document.getElementById("startGameBtn").style.display = "block";
+      document.getElementById("continueBtn").style.display = "block";
+      document.getElementById("startGameBtn").textContent = "Jugar de nuevo";
+      backgroundMusic.pause(); // Pause background music
+      backgroundMusic.currentTime = 0; // Reset music to the start
+      updateLeaderboard();
+    }
+
+    // Draw game elements on canvas
+    function drawGame() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Draw moving background
+      ctx.drawImage(backgroundImage, backgroundX, 0, canvas.width, canvas.height);
+      ctx.drawImage(backgroundImage, backgroundX + canvas.width, 0, canvas.width, canvas.height);
+      
+      // Draw walls with smooth edges
+      ctx.fillStyle = "pink";
+      ctx.beginPath();
+      ctx.moveTo(0, wallPositions[0].top); // Start from the top-left corner
+
+      // Draw top wall with flipped image
+      for (let i = 0; i < canvas.width; i++) {
+        ctx.drawImage(flippedWallImg, i, 0, 1, wallPositions[i].top);
+        
+        // Draw bottom wall
+        ctx.drawImage(wallImg, i, wallPositions[i].bottom, 1, canvas.height - wallPositions[i].bottom);
+      }
+
+      // Draw sperm
+      sperm.draw();
+
+      // Draw white cells
+      for (let whiteCell of whiteCells) {
+        whiteCell.draw();
+      }
+
+      // Draw score
+      ctx.fillStyle = "white";
+      ctx.font = "24px Arial";
+      ctx.fillText("Score: " + score, 10, 30);
+    }
+    
+
+    // Event listeners
+    document.addEventListener("touchstart", (event) => {
+      if (gameState === "playing") {
+        sperm.flap();
+      }
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.code === "Space" && gameState === "playing") sperm.flap();
+    });
+
+    document.getElementById("startGameBtn").addEventListener("click", startGame);
+    document.getElementById("continueBtn").addEventListener("click", handleContinue);
+
+    function updateModalMessage() {
+  const modalMessage = document.getElementById("modalMessage");
+  modalMessage.textContent = `Gracias por intentar, ${userName}. Afortunadamente pude lograrlo y mis papás me esperan con ansias. Si quieres volver a jugar para mejorar tu puntuación cierra la ventana y oprime "juega de nuevo", quien sabe tal vez haya un premio...o no... mi papá es muy codo =P. Si ya te cansaste de perder aprieta "siguiente" para ver la información del evento.`;
+}
+    function handleContinue() {
+  updateModalMessage();
+  document.getElementById("customModal").style.display = "block";
+}
+    // Close the modal when the user clicks on <span> (x)
+    document.querySelector(".close").addEventListener("click", () => {
+      document.getElementById("customModal").style.display = "none";
+    });
+
+    // When the user clicks on "Siguiente" button, redirect to the third page
+    document.getElementById("siguienteBtn").addEventListener("click", () => {
+      window.location.href = "evento.html"; // Replace with the actual URL of the third page
+    });
+
+    function updateLeaderboard() {
+      leaderboard.push({ name: userName, score: score });
+      leaderboard.sort((a, b) => b.score - a.score);
+      if (leaderboard.length > 50) leaderboard.pop(); // Keep only top 50 scores
+      localStorage.setItem('leaderboard', JSON.stringify(leaderboard));
+    }
+   
+
+    // Initial setup
+    initGame(); 
+    document.getElementById("startGameBtn").textContent = "Empezar"; // Initial button text
+  </script>
+</body>
+</html>
+
