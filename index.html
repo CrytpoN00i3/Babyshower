@@ -3,110 +3,201 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mi Baby Shower</title>
-  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Open+Sans:wght@400;700&display=swap" rel="stylesheet">
+  <title>My Baby Shower</title>
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Outfit:wght@400;600&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --primary-color: #f48fb1;
+      --primary-dark: #d81b60;
+      --text-color: #5d4037; /* Warm dark brown instead of harsh black */
+      --bg-gradient: radial-gradient(circle at top right, #fff0f5 0%, #ffe4e1 100%);
+      --card-bg: #ffffff;
+    }
+
     body {
-      font-family: 'Open Sans', sans-serif;
-      background: linear-gradient(to bottom, pink, white);
+      font-family: 'Outfit', sans-serif;
+      background: var(--bg-gradient);
       margin: 0;
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
-      background-image: url(hearts.png); /* Optional background image */
-      background-size: cover;
-      background-position: center;
+      min-height: 100vh;
+      color: var(--text-color);
+      overflow-x: hidden;
     }
 
-    .container {
-      background-color: white;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      text-align: center;
-      max-width: 90%;
-      margin: auto;
-    
+    .background-decor {
+      position: absolute;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      z-index: -1;
+      pointer-events: none;
     }
+
+    .circle {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.4);
+    }
+
+    .circle-1 { width: 300px; height: 300px; top: -100px; left: -100px; }
+    .circle-2 { width: 400px; height: 400px; bottom: -150px; right: -100px; background: rgba(244, 143, 177, 0.1); }
+
+    .container {
+      background-color: var(--card-bg);
+      padding: 50px 40px;
+      border-radius: 30px;
+      box-shadow: 0 15px 35px rgba(216, 27, 96, 0.1);
+      text-align: center;
+      width: 85%;
+      max-width: 420px;
+      margin: auto;
+      border: 2px solid #fff;
+      position: relative;
+    }
+
+    .container::before {
+      content: '';
+      position: absolute;
+      top: 10px; left: 10px; right: 10px; bottom: 10px;
+      border: 1px dashed var(--primary-color);
+      border-radius: 20px;
+      pointer-events: none;
+    }
+
     .container img {
-    display: block;
-    margin: 0 auto 20px;
-    max-width: 50%;
-    height: auto;
-  }
+      display: block;
+      margin: 0 auto 20px;
+      max-width: 55%;
+      height: auto;
+      animation: gentle-bounce 4s ease-in-out infinite;
+      position: relative;
+      z-index: 1;
+    }
+
+    @keyframes gentle-bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-15px); }
+    }
 
     h1 {
       font-family: 'Dancing Script', cursive;
-      color: #ff6699;
-      margin-bottom: 20px;
-      font-size: 2.5em;
+      color: var(--primary-dark);
+      margin-bottom: 25px;
+      margin-top: 0;
+      font-size: 3.5em;
+      text-shadow: 2px 2px 0px #fff;
+      position: relative;
+      z-index: 1;
     }
 
     p {
-      font-size: 1.2em;
-      margin-bottom: 20px;
+      font-size: 1.15em;
+      line-height: 1.6;
+      margin-bottom: 25px;
+      color: var(--text-color);
+      position: relative;
+      z-index: 1;
+    }
+
+    .input-group {
+      position: relative;
+      margin-bottom: 25px;
+      z-index: 1;
     }
 
     input[type="text"] {
-      width: 80%;
-      padding: 10px;
-      font-size: 1em;
-      border: 2px solid #ff6699;
-      border-radius: 5px;
-      margin-bottom: 20px;
+      box-sizing: border-box;
+      width: 100%;
+      padding: 16px 20px;
+      font-size: 1.1em;
+      border: 2px solid #ffccd5;
+      border-radius: 15px;
+      outline: none;
+      transition: all 0.3s ease;
+      font-family: 'Outfit', sans-serif;
+      background-color: #fffafb;
+      color: var(--text-color);
+    }
+
+    input[type="text"]::placeholder {
+      color: #bcaaa4;
+    }
+
+    input[type="text"]:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 4px rgba(244, 143, 177, 0.2);
+      background-color: #fff;
     }
 
     button {
-      background-color: #ff6699;
+      background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
       color: white;
-      padding: 12px 20px;
+      padding: 16px 30px;
       border: none;
-      border-radius: 5px;
+      border-radius: 15px;
       cursor: pointer;
-      font-size: 1em;
+      font-size: 1.2em;
+      font-weight: 600;
+      font-family: 'Outfit', sans-serif;
+      width: 100%;
+      box-shadow: 0 8px 20px rgba(216, 27, 96, 0.25);
+      transition: all 0.3s ease;
+      position: relative;
+      z-index: 1;
     }
 
     button:hover {
-      background-color: #e55d87;
+      transform: translateY(-3px);
+      box-shadow: 0 12px 25px rgba(216, 27, 96, 0.35);
+      background: linear-gradient(135deg, #f06292 0%, #c2185b 100%);
     }
 
-    #greeting,
+    button:active {
+      transform: translateY(1px);
+      box-shadow: 0 5px 15px rgba(216, 27, 96, 0.25);
+    }
+
+    #greeting {
+      display: none;
+      margin-top: 25px;
+      font-size: 1.2em;
+      animation: fadeIn 0.8s ease forwards;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
     #startBtn {
       display: none;
+      margin-top: 15px;
     }
 
-    @media (min-width: 600px) {
-      .container {
-        max-width: 50%;
-      }
-
-      h1 {
-        font-size: 3em;
-      }
-
-      p {
-        font-size: 1.5em;
-      }
-
-      input[type="text"] {
-        width: 70%;
-      }
-
-      button {
-        font-size: 1.2em;
-      }
+    #continueBtn {
+      display: block;
     }
   </style>
 </head>
 <body>
+  <div class="background-decor">
+    <div class="circle circle-1"></div>
+    <div class="circle circle-2"></div>
+  </div>
+
   <div class="container">
     <img src="babyphant1.png" alt="Baby Shower Image">
-    <h1>Mi Baby Shower</h1>
-    <input type="text" id="nameInput" placeholder="Ingresa tu nombre">
-    <button onclick="showMessage()">Continuar</button>
+    <h1>My Baby Shower</h1>
+    
+    <div class="input-group" id="inputContainer">
+      <input type="text" id="nameInput" placeholder="Enter your name">
+    </div>
+    
+    <button id="continueBtn" onclick="showMessage()">Continue</button>
     <p id="greeting"></p>
-    <button id="startBtn" onclick="startGame()">Empezar</button>
+    <button id="startBtn" onclick="startGame()">Start</button>
   </div>
 
   <script>
@@ -114,12 +205,16 @@
       const name = document.getElementById('nameInput').value.trim();
       if (name) {
         localStorage.setItem('username', name);
-        const greetingMessage = `Hola ${name}, mis papás te consideran importante en sus vidas y por eso te invitan a celebrar mi baby shower. Pero primero, ayúdame a crearme en un pequeño juego. May the odds be ever in your favor.`;
+        const greetingMessage = `Hello ${name}, my parents consider you a very important part of their lives, and that's why they are inviting you to celebrate my baby shower! But first, please help me reach them in a little game. May the odds be ever in your favor.`;
         document.getElementById('greeting').innerText = greetingMessage;
+        
+        document.getElementById('inputContainer').style.display = 'none';
+        document.getElementById('continueBtn').style.display = 'none';
+        
         document.getElementById('greeting').style.display = 'block';
         document.getElementById('startBtn').style.display = 'block';
       } else {
-        alert('Por favor, ingresa tu nombre');
+        alert('Please enter your name');
       }
     }
 

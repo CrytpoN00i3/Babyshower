@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Mi Baby Shower - Juego</title>
+  <title>My Baby Shower - Game</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
   <!-- Add Firestore SDK -->
@@ -13,91 +13,136 @@
       text-align: center;
       background: linear-gradient(to bottom, pink, white);
       background-image: url(hearts.png);
-      color: #333; /* dark text color */
+      color: #333;
       margin: 0;
       padding: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
       height: 100vh;
+      overflow: hidden; /* Avoid scrollbars on mobile */
     }
     #container {
       width: 100%;
-      max-width: 400px;
-      padding: 20px;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+    h1 {
+      position: absolute;
+      top: 10px;
+      left: 0;
+      width: 100%;
+      z-index: 10;
+      pointer-events: none; /* Let clicks pass to canvas */
+      color: #d81b60;
+      text-shadow: 2px 2px 4px rgba(255,255,255,0.8);
+      margin: 0;
+      font-size: 2.5rem;
     }
     #gameCanvas {
-      background-color: #000; /* black background for game canvas */
-      border: 2px solid white;
+      background-color: #000;
+      display: block;
       width: 100%;
-      max-width: 100%;
+      height: 100%;
     }
     #buttons {
+      position: absolute;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
       display: flex;
-      justify-content: space-between;
-      margin-top: 10px;
+      justify-content: center;
+      gap: 15px;
+      z-index: 10;
+      width: 90%;
+      max-width: 400px;
     }
     .game-button {
-      background-color: #f06292; /* pink button */
+      background-color: #d81b60;
       color: white;
-      padding: 12px 20px;
+      padding: 15px 20px;
       border: none;
+      border-radius: 8px;
       cursor: pointer;
       flex: 1;
-      margin: 0 5px;
+      font-size: 1.5rem;
+      font-family: 'Dancing Script', cursive;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+      transition: background-color 0.3s;
+    }
+    .game-button:hover {
+      background-color: #c2185b;
     }
     #gameOverMsg {
       display: none;
-      font-size: 24px;
-      color: red;
-      margin-top: 20px;
+      position: absolute;
+      top: 40%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 3rem;
+      color: #d81b60;
+      text-shadow: 2px 2px 5px rgba(255,255,255,0.9);
+      z-index: 10;
+      pointer-events: none;
+      margin: 0;
     }
     /* Modal styles */
     .modal {
-      display: none; /* Hidden by default */
-      position: fixed; /* Stay in place */
-      z-index: 1; /* Sit on top */
-      padding-top: 100px; /* Location of the box */
+      display: none;
+      position: fixed;
+      z-index: 100;
       left: 0;
       top: 0;
-      width: 100%; /* Full width */
-      height: 100%; /* Full height */
-      overflow: auto; /* Enable scroll if needed */
-      background-color: rgb(0,0,0); /* Fallback color */
-      background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(255, 230, 238, 0.85); /* Soft pink overlay instead of blur/glass */
     }
     .modal-content {
-      font-family: 'Arial Narrow', sans-serif; /* Change to your desired font family */
-    font-size: 25px; /* Change to your desired font size */
-    color: #333; /* Optional: change to your desired text color */
-      background-color: #fefefe;
-      margin: auto;
-      padding: 20px;
-      border: 1px solid #888;
-      width: 80%;
-      max-width: 400px; /* Maximum width */
-      text-align: center; /* Center the text */
+      font-family: 'Outfit', sans-serif;
+      font-size: 18px;
+      color: #5d4037;
+      background-color: #fff;
+      margin: 15% auto;
+      padding: 30px 20px;
+      border: 2px solid #ffccd5;
+      border-radius: 20px;
+      width: 85%;
+      max-width: 400px;
+      text-align: center;
+      box-shadow: 0 15px 35px rgba(216, 27, 96, 0.15);
     }
     .close {
-      color: #aaa;
+      color: #f48fb1;
       float: right;
-      font-size: 28px;
+      font-size: 32px;
       font-weight: bold;
+      margin-top: -20px;
+      margin-right: -5px;
+      transition: color 0.3s;
     }
     .close:hover,
     .close:focus {
-      color: black;
+      color: #d81b60;
       text-decoration: none;
       cursor: pointer;
     }
     #siguienteBtn {
-      background-color: #f06292; /* Pink button */
+      background: linear-gradient(135deg, #f48fb1 0%, #d81b60 100%);
       color: white;
-      padding: 12px 20px;
+      padding: 12px 25px;
       border: none;
+      border-radius: 12px;
       cursor: pointer;
-      margin-top: 10px;
+      margin-top: 20px;
+      font-size: 1.1rem;
+      box-shadow: 0 4px 10px rgba(216, 27, 96, 0.2);
+      transition: transform 0.2s, box-shadow 0.3s;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 600;
+    }
+    #siguienteBtn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 15px rgba(216, 27, 96, 0.3);
     }
   </style>
 </head>
@@ -107,11 +152,10 @@
 </audio>
 <body>
   <div id="container">
-    <h1>Mi Baby Shower</h1>
-    <canvas id="gameCanvas" width="400" height="600"></canvas>
+    <canvas id="gameCanvas"></canvas>
     <div id="buttons">
-      <button class="game-button" id="startGameBtn">Empezar</button>
-      <button class="game-button" id="continueBtn">Continuar</button>
+      <button class="game-button" id="startGameBtn">Start</button>
+      <button class="game-button" id="continueBtn" style="display:none;">Continue</button>
     </div>
     <div id="gameOverMsg">Game Over</div>
   </div>
@@ -120,7 +164,7 @@
     <div class="modal-content">
       <span class="close">&times;</span>
       <p id="modalMessage"></p>
-      <button id="siguienteBtn">Siguiente</button>
+      <button id="siguienteBtn">Next</button>
     </div>
   </div>
   <script>
@@ -164,9 +208,41 @@
     const userName = localStorage.getItem("username") || 'Player';
     let leaderboard = [];
     let backgroundX = 0;
-    let backgroundSpeed = 1; // Adjust this speed as needed
     let sessionID = Date.now().toString();
     
+    function getSpeechMessage(currentScore) {
+      if (currentScore < 250) {
+        return [
+          `${userName}, pls help me reach my goal!`,
+          `${userName}, watch out for those white cells!`,
+          `Keep swimming, ${userName}!`
+        ][Math.floor(Math.random() * 3)];
+      } else if (currentScore < 500) {
+        return [
+          `${userName}, I think we are almost there!`,
+          `${userName}, we can do it! Don't give up!`,
+          `Whoa, that was close, ${userName}!`
+        ][Math.floor(Math.random() * 3)];
+      } else if (currentScore < 1500) {
+        return [
+          `${userName}, do not fail me we are so close!`,
+          `Luke Skywalker would be proud, ${userName}!`,
+          `Use the force, ${userName}!`
+        ][Math.floor(Math.random() * 3)];
+      } else {
+        return [
+          `${userName}, we are going warp speed!`,
+          `Are you secretly a pro gamer, ${userName}?`,
+          `To infinity and beyond, ${userName}!`
+        ][Math.floor(Math.random() * 3)];
+      }
+    }
+    
+    let activeSpeech = false;
+    let currentSpeechMessage = "";
+    let lastSpeechTime = 0;
+    const speechDuration = 3500; // Bubble stays for 3.5 seconds
+    const speechCooldown = 4000; // 4 seconds between bubbles
 
     class Sperm {
       constructor() {
@@ -205,7 +281,13 @@
           this.velocity = 0;
         }
 
-        this.tailAngle = Math.sin(Date.now() * 0.01) * 0.2;
+        if (gameState === "dying") {
+          this.tailAngle += 0.5; // Spin frantically
+          this.x -= gameSpeed; // Drift back
+        } else {
+          // Improved tail animation: faster and wider flap
+          this.tailAngle = Math.sin(Date.now() * 0.02) * 0.4;
+        }
       }
 
       flap() {
@@ -219,29 +301,42 @@
         this.y = y;
         this.radius = 12; // Smaller radius for white cells
         this.speed = speed;
+        this.angle = 0; // Rotation angle
       }
 
       draw() {
-        ctx.drawImage(whiteCellImg, this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2);
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.rotate(this.angle);
+        ctx.drawImage(whiteCellImg, -this.radius, -this.radius, this.radius * 2, this.radius * 2);
+        ctx.restore();
       }
 
       update() {
         this.x -= this.speed;
+        this.angle += 0.05; // Rotate slightly each frame
       }
     }
 
     // Initialize game variables
     function initGame() {
+      // Set canvas size to screen size
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
       sperm = new Sperm();
       whiteCells = [];
       score = 0;
       gameState = "menu";
-      gameSpeed = 2;
+      gameSpeed = canvas.width / 200; // Scale speed with width
       distanceTraveled = 0;
       wallPositions = [];
-      wallGap = 400; // Wider gap
-      baseSpeed = 2;
+      distanceTraveled = 0;
+      wallPositions = [];
+      wallGap = canvas.height * 0.6; // Gap proportional to screen height
+      baseSpeed = canvas.width / 200;
       speedIncrement = 0.03;
+      backgroundSpeed = 1; // Reset background speed
 
       startTime = null; // Reset start time
       spawnRate = 75; // Initial spawn rate for white cells
@@ -257,12 +352,20 @@
       }
 
       // Initial sperm position
-      sperm.x = 50;
+      sperm.x = canvas.width * 0.15; // Proportional x position
       sperm.y = canvas.height / 2;
-      while (sperm.y - sperm.radius < wallPositions[sperm.x].top || sperm.y + sperm.radius > wallPositions[sperm.x].bottom) {
+      while (sperm.y - sperm.radius < wallPositions[Math.floor(sperm.x)].top || sperm.y + sperm.radius > wallPositions[Math.floor(sperm.x)].bottom) {
         sperm.y = Math.random() * (canvas.height - sperm.radius * 2) + sperm.radius;
       }
     }
+
+    window.addEventListener('resize', () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      if (gameState === 'menu' || gameState === 'gameover') {
+         initGame();
+      }
+    });
 
     // Start game
     function startGame() {
@@ -282,7 +385,7 @@
       updateGame();
       drawGame();
 
-      if (gameState === "playing") {
+      if (gameState === "playing" || gameState === "dying") {
         requestAnimationFrame(loop);
       }
     }
@@ -290,6 +393,8 @@
     // Update game logic
     function updateGame() {
       sperm.update();
+
+      if (gameState === "dying") return; // Stop updating walls and cells when dying
 
       // Update background position
       backgroundX -= backgroundSpeed;
@@ -299,6 +404,7 @@
 
       // Update wall positions
       for (let i = 0; i < canvas.width; i++) {
+        if (!wallPositions[i]) wallPositions[i] = { top: 0, bottom: canvas.height };
         let angle = ((Date.now() - startTime) * 0.002 + (i / canvas.width) * Math.PI * 2) % (Math.PI * 2);
         wallPositions[i].top = canvas.height / 6 + Math.sin(angle) * 20 + Math.sin(Date.now() * 0.003) * 20; // Smooth motion
         wallPositions[i].bottom = (canvas.height / 6) * 5 + Math.sin(angle + Math.PI) * 20 + Math.cos(Date.now() * 0.003) * 20; // Smooth motion
@@ -345,6 +451,17 @@
       // Calculate score based on distance traveled
       distanceTraveled += gameSpeed;
       score = Math.floor(distanceTraveled / 10); // Adjust score calculation as needed
+
+      // Speech bubble logic
+      let now = Date.now();
+      if (!activeSpeech && now - lastSpeechTime > speechCooldown) {
+         activeSpeech = true;
+         currentSpeechMessage = getSpeechMessage(score);
+         lastSpeechTime = now;
+      } else if (activeSpeech && now - lastSpeechTime > speechDuration) {
+         activeSpeech = false;
+         lastSpeechTime = now;
+      }
     }
     async function updateLeaderboard() {
   try {
@@ -395,18 +512,29 @@ async function fetchLeaderboard() {
 }
     // Game Over
     function gameOver() {
-  if (gameState === "gameover") return; // Ensure only one entry per session
-
-  gameState = "gameover";
-  document.getElementById("gameOverMsg").style.display = "block";
-  document.getElementById("startGameBtn").style.display = "block";
-  document.getElementById("continueBtn").style.display = "block";
-  document.getElementById("startGameBtn").textContent = "Jugar de nuevo";
-  backgroundMusic.pause();
-  backgroundMusic.currentTime = 0;
-
-  updateLeaderboard(); // Update Firestore leaderboard
-}
+      if (gameState === "gameover" || gameState === "dying") return; // Ensure only one entry per session
+    
+      gameState = "dying";
+      sperm.velocity = -5; // Bounce up slightly on death
+      backgroundSpeed = 0;
+      
+      // Show dying message
+      activeSpeech = true;
+      currentSpeechMessage = `Noooo we were so close ${userName}!`;
+      lastSpeechTime = Date.now();
+      
+      setTimeout(() => {
+        gameState = "gameover";
+        document.getElementById("gameOverMsg").style.display = "block";
+        document.getElementById("startGameBtn").style.display = "block";
+        document.getElementById("continueBtn").style.display = "block";
+        document.getElementById("startGameBtn").textContent = "Play Again";
+        backgroundMusic.pause();
+        backgroundMusic.currentTime = 0;
+      
+        updateLeaderboard(); // Update Firestore leaderboard
+      }, 2000);
+    }
     
 
     // Draw game elements on canvas
@@ -442,6 +570,59 @@ async function fetchLeaderboard() {
       ctx.fillStyle = "white";
       ctx.font = "24px Arial";
       ctx.fillText("Score: " + score, 10, 30);
+      
+      // Draw speech bubble
+      if ((gameState === "playing" || gameState === "dying") && activeSpeech) {
+        ctx.save();
+        // Position bubble slightly above and to the right of sperm
+        ctx.translate(sperm.x + sperm.radius, sperm.y - sperm.radius - 15);
+        
+        ctx.font = "bold 16px 'Outfit', sans-serif";
+        let textWidth = ctx.measureText(currentSpeechMessage).width;
+        let paddingX = 15;
+        let paddingY = 10;
+        let bubbleW = textWidth + paddingX * 2;
+        let bubbleH = 16 + paddingY * 2; 
+        let bubbleX = 10; // Offset to the right
+        let bubbleY = -bubbleH;
+        
+        // Draw bubble background
+        ctx.fillStyle = "rgba(255, 255, 255, 0.95)";
+        ctx.strokeStyle = "rgba(216, 27, 96, 0.6)";
+        ctx.lineWidth = 2;
+        
+        ctx.beginPath();
+        if (ctx.roundRect) {
+            ctx.roundRect(bubbleX, bubbleY, bubbleW, bubbleH, 15);
+        } else {
+            ctx.rect(bubbleX, bubbleY, bubbleW, bubbleH);
+        }
+        ctx.fill();
+        ctx.stroke();
+        
+        // Draw bubble tail
+        ctx.beginPath();
+        ctx.moveTo(bubbleX + 15, bubbleY + bubbleH);
+        ctx.lineTo(bubbleX + 5, bubbleY + bubbleH + 15);
+        ctx.lineTo(bubbleX + 25, bubbleY + bubbleH);
+        ctx.fill();
+        ctx.stroke();
+        
+        // Fix tail overlap line
+        ctx.beginPath();
+        ctx.moveTo(bubbleX + 16, bubbleY + bubbleH);
+        ctx.lineTo(bubbleX + 24, bubbleY + bubbleH);
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.95)";
+        ctx.stroke();
+        
+        // Draw text
+        ctx.fillStyle = "#d81b60";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(currentSpeechMessage, bubbleX + bubbleW/2, bubbleY + bubbleH/2);
+        
+        ctx.restore();
+      }
     }
     
 
@@ -461,7 +642,7 @@ async function fetchLeaderboard() {
 
     function updateModalMessage() {
   const modalMessage = document.getElementById("modalMessage");
-  modalMessage.textContent = `Gracias por intentar, ${userName}. Afortunadamente pude lograrlo y mis papás me esperan con ansias. Si quieres volver a jugar para mejorar tu puntuación cierra la ventana y oprime "juega de nuevo", quien sabe tal vez haya un premio...o no... mi papá es muy codo =P. Si ya te cansaste de perder aprieta "siguiente" para ver la información del evento.`;
+  modalMessage.textContent = `Thanks for trying, ${userName}. Luckily I made it and my parents are eagerly waiting for me. If you want to play again to improve your score, close this window and click "Play Again"... who knows, maybe there's a prize... or not... my dad is very cheap =P. If you're tired of losing, click "Next" to see the event info.`;
 }
     function handleContinue() {
   updateModalMessage();
@@ -481,7 +662,7 @@ async function fetchLeaderboard() {
     // Initial setup
     initGame(); 
     fetchLeaderboard(); // Fetch leaderboard on page load
-    document.getElementById("startGameBtn").textContent = "Empezar"; // Initial button text
+    document.getElementById("startGameBtn").textContent = "Start"; // Initial button text
   </script>
 </body>
 </html>
